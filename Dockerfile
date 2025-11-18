@@ -14,3 +14,4 @@ COPY . .
 # Expose port and set default CMD
 EXPOSE 8080
 CMD ["node", "server.js"]
+    
