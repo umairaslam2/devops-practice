@@ -9,7 +9,10 @@ services:
     environment:
       - MONGO_URL=mongodb://mongo:27017/mydb
     depends_on:
-      - mongo 
+      - mongo
+    volumes:
+      - ./:/usr/src/app           # <- local code container me mount
+      - /usr/src/app/node_modules # <- node_modules ko ignore karo
 
   mongo:
     image: mongo:latest
@@ -18,6 +21,15 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+
+  watchtower:
+    image: containrrr/watchtower:latest
+    container_name: watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 devops-node-app
+    # har 30 seconds me check karega devops-node-app container ke liye update
 
 volumes:
   mongo_data:
