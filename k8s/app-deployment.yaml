@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-node-app
+  namespace: devops
+  labels:
+    app: devops-node-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-node-app
+  template:
+    metadata:
+      labels:
+        app: devops-node-app
+    spec:
+      containers:
+        - name: app
+          image: umairaslam2/devops-node-app:latest  
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: app-config
+            

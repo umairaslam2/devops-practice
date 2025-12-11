@@ -13,6 +13,9 @@ services:
     volumes:
       - ./:/usr/src/app           # <- local code container me mount
       - /usr/src/app/node_modules # <- node_modules ko ignore karo
+      
+    command:  npm run dev
+
 
   mongo:
     image: mongo:latest
