@@ -1,9 +1,16 @@
+# Ignore Node modules
 node_modules/
 
 # Ignore Minikube binary
 minikube-linux-amd64
 
-# ignore local kube config 
+# Ignore local kube config and Minikube data
 .kube/
 .minikube/
 
+# Optional: Ignore logs and temporary files
+*.log
+*.tmp
+
+# Ignore secrets
+k8s/secret.yaml
