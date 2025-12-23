@@ -1,1 +1,9 @@
 node_modules/
+
+# Ignore Minikube binary
+minikube-linux-amd64
+
+# ignore local kube config 
+.kube/
+.minikube/
+

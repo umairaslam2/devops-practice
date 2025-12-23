@@ -17,11 +17,12 @@ spec:
     spec:
       containers:
         - name: app
-          image: umairaslam2/devops-node-app:latest  
+          image: umairaslam2/devops-node-app:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
-          envFrom:
+          envFrom:                    # <-- yeh containers ke andar hona chahiye
             - configMapRef:
                 name: app-config
-            
+            - secretRef:
+                name: app-secrets
