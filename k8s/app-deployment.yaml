@@ -28,6 +28,15 @@ spec:
             - secretRef:
                 name: app-secrets
 
+          # RESOURCE REQUESTS & LIMITS
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+
           # LIVENESS PROBE
           livenessProbe:
             httpGet:
