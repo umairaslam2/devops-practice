@@ -6,9 +6,10 @@ app.get("/", (req, res) => {
   res.send(" container successfullly bangiya ");
 });
 
-app.get("/healthz", (req, res) => {
-  res.json({ status: "ok", time: new Date().toISOString() });
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "OK" });
 });
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
