@@ -3,14 +3,11 @@
 #############################
 FROM node:18-alpine AS build
 
-# Create app directory
 WORKDIR /usr/src/app
 
-# Install dependencies first (cache optimization)
 COPY package*.json ./
-RUN npm ci --only=production || npm install --only=production
+RUN npm ci --only=production
 
-# Copy full source code
 COPY . .
 
 #############################
@@ -18,20 +15,14 @@ COPY . .
 #############################
 FROM node:18-alpine
 
-# Create working directory
 WORKDIR /usr/src/app
 
-# Copy built node_modules from build stage
+# Copy only required artifacts
 COPY --from=build /usr/src/app/node_modules ./node_modules
+COPY --from=build /usr/src/app/server.js ./
+COPY --from=build /usr/src/app/package.json ./
 
-# Copy source files
-COPY --from=build /usr/src/app ./
-
-# Security: disable root user
 USER node
 
-# Expose port
 EXPOSE 8080
-
-# Run app
 CMD ["node", "server.js"]

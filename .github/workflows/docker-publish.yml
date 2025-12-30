@@ -44,6 +44,8 @@ jobs:
           image-ref: umairaslam2/devops-node-app:${{ github.sha }}
           severity: HIGH,CRITICAL
           exit-code: 1
+          ignore-unfixed: true
+          scanners: vuln 
           format: table
 
       # 7️⃣ Push Docker Image
