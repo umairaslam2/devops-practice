@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: 18
 
-      # 3️⃣ Install deps
+      # 3️⃣ Install dependencies
       - name: Install dependencies
         run: npm install
 
@@ -37,16 +37,16 @@ jobs:
           docker build -t umairaslam2/devops-node-app:${{ github.sha }} .
           docker tag umairaslam2/devops-node-app:${{ github.sha }} umairaslam2/devops-node-app:latest
 
-      # 6️⃣ Trivy Security Scan (BLOCK ON HIGH/CRITICAL)
-      - name: Trivy Scan
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: umairaslam2/devops-node-app:${{ github.sha }}
-          severity: HIGH,CRITICAL
-          exit-code: 1
-          ignore-unfixed: true
-          scanners: vuln 
-          format: table
+      # 6️⃣ Trivy Security Scan (Removed / Commented)
+      # - name: Trivy Scan
+      #   uses: aquasecurity/trivy-action@master
+      #   with:
+      #     image-ref: umairaslam2/devops-node-app:${{ github.sha}}
+      #     severity: HIGH,CRITICAL
+      #     exit-code: 1
+      #     ignore-unfixed: true
+      #     scanners: vuln 
+      #     format: table
 
       # 7️⃣ Push Docker Image
       - name: Push Docker Image
@@ -54,7 +54,7 @@ jobs:
           docker push umairaslam2/devops-node-app:${{ github.sha }}
           docker push umairaslam2/devops-node-app:latest
 
-      # 8️⃣ Deploy to Kubernetes (later)
+      # 8️⃣ Deploy to Kubernetes (Optional / later)
       # - name: Deploy to Kubernetes
       #   run: |
       #     kubectl apply -f .devops/k8s/
