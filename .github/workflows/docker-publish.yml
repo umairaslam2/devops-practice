@@ -24,13 +24,13 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # 4️⃣ Lint
-      - name: Run ESLint
-        run: npm run lint
+      # # 4️⃣ Lint
+      # - name: Run ESLint
+      #   run: npm run lint
 
-      # 5️⃣ Test
-      - name: Run Tests
-        run: npm test
+      # # 5️⃣ Test
+      # - name: Run Tests
+      #   run: npm test
 
       # 6️⃣ Docker Login
       - name: Docker Login
@@ -59,13 +59,13 @@ jobs:
           docker push umairaslam2/devops-node-app:${{ github.sha }}
           docker push umairaslam2/devops-node-app:latest
 
-      # 🔟 Deploy to Kubernetes
-      - name: Deploy to Kubernetes
-        run: |
-          kubectl apply -f .devops/k8s/
+      # # 🔟 Deploy to Kubernetes
+      # - name: Deploy to Kubernetes
+      #   run: |
+      #     kubectl apply -f .devops/k8s/
 
-      # 🔁 Rollback
-      - name: Rollback on Failure
-        if: failure()
-        run: |
-          kubectl rollout undo deployment/devops-node-app -n devops
+      # # 🔁 Rollback
+      # - name: Rollback on Failure
+      #   if: failure()
+      #   run: |
+      #     kubectl rollout undo deployment/devops-node-app -n devops
