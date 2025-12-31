@@ -1,8 +1,7 @@
-# Workflow ka naam (GitHub Actions UI mein show hota hai)
+# Workflow ka naam
 name: CI/CD Pipeline
 
-# Kab trigger ho?
-# Jab bhi main branch pe push ho
+# Trigger
 on:
   push:
     branches:
@@ -17,27 +16,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Repository ka code runner machine pe
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # Step 2: Node.js environment setup 
       - name: Setup Node.js (v18)
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      # Step 3: Project dependencies installation
-      - name: Install NPM dependencies
+      - name: Install dependencies
         run: npm install
 
-      # Step 4: Code quality check (ESLint)
-      # Agar lint fail hua → pipeline yahin fail ho jayegi
       - name: Run ESLint
         run: npm run lint
 
-      # Step 5: Automated tests run (Jest)
-      # Tests fail → Docker build nahi hoga
       - name: Run Unit Tests
         run: npm test
 
@@ -47,37 +39,23 @@ jobs:
   docker:
     name: Docker Build, Security Scan & Push
     runs-on: ubuntu-latest
-
-    # IMPORTANT:
-    # Yeh job tabhi chalegi jab CI job SUCCESS ho
     needs: ci
 
     steps:
-      # Step 1: Code phir se checkout
       - name: Checkout source code
         uses: actions/checkout@v4
 
-      # Step 2: DockerHub login
-      # Credentials GitHub Secrets se aate hain
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Step 3: Docker image build
-      # SHA tag → rollback & traceability ke liye
       - name: Build Docker Image
         run: |
           docker build -t umairaslam2/devops-node-app:${{ github.sha }} .
           docker tag umairaslam2/devops-node-app:${{ github.sha }} umairaslam2/devops-node-app:latest
 
-      #################################
-      # Step 4: SECURITY SCAN (Trivy)
-      #################################
-      # ⚠️ Abhi REPORT MODE mein hai
-      # HIGH / CRITICAL show honge
-      # Lekin pipeline fail nahi hogi
       - name: Trivy Security Scan (Report Only)
         uses: aquasecurity/trivy-action@master
         with:
@@ -85,21 +63,61 @@ jobs:
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           scanners: vuln
-          exit-code: 0          # ❗ non-blocking
-          format: table
+          exit-code: 0
 
-      #################################
-      # Step 5: Docker image push
-      #################################
-      # Security scan ke baad image push hoti hai
-      - name: Push Docker Image to DockerHub
+      - name: Push Docker Image
         run: |
           docker push umairaslam2/devops-node-app:${{ github.sha }}
           docker push umairaslam2/devops-node-app:latest
 
 #####################################
-# FUTURE (Optional)
+# JOB 3: Kubernetes Deploy + Rollback
 #####################################
-# Step 6 (future):
-# Kubernetes deployment
-# kubectl apply -f k8s/
+  deploy:
+    name: Deploy to Kubernetes
+    runs-on: ubuntu-latest
+    needs: docker
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      #################################
+      # Step 1: Setup kubectl
+      #################################
+      - name: Setup kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.30.0
+
+      #################################
+      # Step 2: Configure Kubeconfig
+      #################################
+      - name: Configure kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > ~/.kube/config
+
+      #################################
+      # Step 3: Update image in deployment
+      #################################
+      - name: Deploy new version
+        run: |
+          kubectl set image deployment/devops-node-app \
+            devops-node-app=umairaslam2/devops-node-app:${{ github.sha }} \
+            -n devops
+
+      #################################
+      # Step 4: Wait for rollout
+      #################################
+      - name: Verify rollout
+        run: |
+          kubectl rollout status deployment/devops-node-app -n devops
+
+      #################################
+      # Step 5: AUTO ROLLBACK ON FAILURE
+      #################################
+      - name: Rollback if deployment fails
+        if: failure()
+        run: |
+          kubectl rollout undo deployment/devops-node-app -n devops
