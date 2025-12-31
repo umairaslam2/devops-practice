@@ -42,10 +42,10 @@ jobs:
         run: npm test
 
 #####################################
-# JOB 2: Docker Build & Push
+# JOB 2: Docker Build + Security + Push
 #####################################
   docker:
-    name: Build & Push Docker Image
+    name: Docker Build, Security Scan & Push
     runs-on: ubuntu-latest
 
     # IMPORTANT:
@@ -53,26 +53,45 @@ jobs:
     needs: ci
 
     steps:
-      # Step 1: Code phir se checkout (har job fresh runner hota hai)
+      # Step 1: Code phir se checkout
       - name: Checkout source code
         uses: actions/checkout@v4
 
       # Step 2: DockerHub login
-      # Credentials GitHub Secrets se aate hain (secure)
+      # Credentials GitHub Secrets se aate hain
       - name: Login to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # Step 3: Docker image building
-      # Image ko commit SHA ke sath tag kara hai (rollback ke liye best practice)
+      # Step 3: Docker image build
+      # SHA tag → rollback & traceability ke liye
       - name: Build Docker Image
         run: |
           docker build -t umairaslam2/devops-node-app:${{ github.sha }} .
           docker tag umairaslam2/devops-node-app:${{ github.sha }} umairaslam2/devops-node-app:latest
 
-      # Step 4: Docker image push DockerHub pe
+      #################################
+      # Step 4: SECURITY SCAN (Trivy)
+      #################################
+      # ⚠️ Abhi REPORT MODE mein hai
+      # HIGH / CRITICAL show honge
+      # Lekin pipeline fail nahi hogi
+      - name: Trivy Security Scan (Report Only)
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: umairaslam2/devops-node-app:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          scanners: vuln
+          exit-code: 0          # ❗ non-blocking
+          format: table
+
+      #################################
+      # Step 5: Docker image push
+      #################################
+      # Security scan ke baad image push hoti hai
       - name: Push Docker Image to DockerHub
         run: |
           docker push umairaslam2/devops-node-app:${{ github.sha }}
@@ -81,6 +100,6 @@ jobs:
 #####################################
 # FUTURE (Optional)
 #####################################
-# Step 5 (future):
-# Kubernetes deployment yahan add hoga
+# Step 6 (future):
+# Kubernetes deployment
 # kubectl apply -f k8s/
