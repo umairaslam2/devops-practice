@@ -73,51 +73,51 @@ jobs:
 #####################################
 # JOB 3: Kubernetes Deploy + Rollback
 #####################################
-  deploy:
-    name: Deploy to Kubernetes
-    runs-on: ubuntu-latest
-    needs: docker
+  # deploy:
+  #   name: Deploy to Kubernetes
+  #   runs-on: ubuntu-latest
+  #   needs: docker
 
-    steps:
-      - name: Checkout source code
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout source code
+  #       uses: actions/checkout@v4
 
-      #################################
-      # Step 1: Setup kubectl
-      #################################
-      - name: Setup kubectl
-        uses: azure/setup-kubectl@v4
-        with:
-          version: v1.30.0
+  #     #################################
+  #     # Step 1: Setup kubectl
+  #     #################################
+  #     - name: Setup kubectl
+  #       uses: azure/setup-kubectl@v4
+  #       with:
+  #         version: v1.30.0
 
-      #################################
-      # Step 2: Configure Kubeconfig
-      #################################
-      - name: Configure kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > ~/.kube/config
+  #     #################################
+  #     # Step 2: Configure Kubeconfig
+  #     #################################
+  #     - name: Configure kubeconfig
+  #       run: |
+  #         mkdir -p ~/.kube
+  #         echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 -d > ~/.kube/config
 
-      #################################
-      # Step 3: Update image in deployment
-      #################################
-      - name: Deploy new version
-        run: |
-          kubectl set image deployment/devops-node-app \
-            devops-node-app=umairaslam2/devops-node-app:${{ github.sha }} \
-            -n devops
+  #     #################################
+  #     # Step 3: Update image in deployment
+  #     #################################
+  #     - name: Deploy new version
+  #       run: |
+  #         kubectl set image deployment/devops-node-app \
+  #           devops-node-app=umairaslam2/devops-node-app:${{ github.sha }} \
+  #           -n devops
 
-      #################################
-      # Step 4: Wait for rollout
-      #################################
-      - name: Verify rollout
-        run: |
-          kubectl rollout status deployment/devops-node-app -n devops
+  #     #################################
+  #     # Step 4: Wait for rollout
+  #     #################################
+  #     - name: Verify rollout
+  #       run: |
+  #         kubectl rollout status deployment/devops-node-app -n devops
 
-      #################################
-      # Step 5: AUTO ROLLBACK ON FAILURE
-      #################################
-      - name: Rollback if deployment fails
-        if: failure()
-        run: |
-          kubectl rollout undo deployment/devops-node-app -n devops
+  #     #################################
+  #     # Step 5: AUTO ROLLBACK ON FAILURE
+  #     #################################
+  #     - name: Rollback if deployment fails
+  #       if: failure()
+  #       run: |
+  #         kubectl rollout undo deployment/devops-node-app -n devops
