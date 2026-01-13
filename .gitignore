@@ -1,16 +1,31 @@
-# Ignore Node modules
+# --------------------
+# Node
+# --------------------
 node_modules/
 
-# Ignore Minikube binary
-minikube-linux-amd64
-
-# Ignore local kube config and Minikube data
-.kube/
-.minikube/
-
-# Optional: Ignore logs and temporary files
+# --------------------
+# Logs & temp
+# --------------------
 *.log
 *.tmp
 
-# Ignore secrets
+# --------------------
+# Kubernetes local configs
+# --------------------
+.kube/
+.minikube/
+minikube-linux-amd64
+
+# --------------------
+# Kubernetes Secrets
+# --------------------
 k8s/secret.yaml
+
+# --------------------
+# Terraform
+# --------------------
+**/.terraform/*
+*.tfstate
+*.tfstate.backup
+.crash.log
+terraform.tfvars
